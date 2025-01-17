@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 """ ИЗОБРАЖЕНИЕ """
 # Загрузка изображения
-image_0 = cv2.imread('snake.png', cv2.IMREAD_GRAYSCALE)
+image_0 = cv2.imread('podkova.png', cv2.IMREAD_GRAYSCALE)
 all_points0 = []
 all_points = []
 # Проверка, удалось ли загрузить изображение
@@ -175,6 +175,30 @@ def potencial_energy(Gy, By):
     U = m * 9.82 * 100 *  (Gy - By)
     return U
 
+
+def find_extrema(energies):
+    """ Ищет положения устойчивого и неустойчивого равновесия"""
+    angles = [energy[0] for energy in energies]
+    potential_energies = [energy[1] for energy in energies]
+    extrema = []
+    n = len(energies)
+
+    for i in range(n):
+        prev_i = (i - 1) % n
+        next_i = (i + 1) % n
+
+        # Проверяем на экстремум
+        if potential_energies[i] > potential_energies[prev_i] and potential_energies[i] > potential_energies[next_i]:
+            # Это максимум
+            stability = "неустойчивое"
+            extrema.append((angles[i], potential_energies[i], stability))
+        elif potential_energies[i] < potential_energies[prev_i] and potential_energies[i] < potential_energies[next_i]:
+            # Это минимум
+            stability = "устойчивое"
+            extrema.append((angles[i], potential_energies[i], stability))
+
+    return extrema
+
 """ ОБРАБОТКА ДАННЫХ И ВЫВОД"""
 
 S = m / (ro * d)
@@ -281,9 +305,12 @@ for theta in range(0, 360):
     # Сохраняем результаты
     energies.append((theta, U))
 
+extrema = find_extrema(energies)
+print("Экстремумы потенциальной энергии:")
+for angle, energy, stability in extrema:
+    print(f"Угол: {angle}° - Потенциальная энергия: {energy} Дж * 10^(-5) - Положение равновесия: {stability}")
 
 # График
-
 angles, energy_values = zip(*energies)
 plt.plot(angles, energy_values)
 plt.xlabel(r"Угол $\theta$")
