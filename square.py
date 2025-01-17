@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 """ ИЗОБРАЖЕНИЕ """
 # Загрузка изображения
-image_0 = cv2.imread('duck.png', cv2.IMREAD_GRAYSCALE)
+image_0 = cv2.imread('snake.png', cv2.IMREAD_GRAYSCALE)
 all_points0 = []
 all_points = []
 # Проверка, удалось ли загрузить изображение
@@ -276,7 +276,7 @@ for theta in range(0, 360):
     # Вычисление потенциальной энергии
     Gy_ = Gy / units
     By_ = By / units
-    U = potencial_energy(Gy_, By_)
+    U = potencial_energy(Gy_, By_) * 10**(-2)
 
     # Сохраняем результаты
     energies.append((theta, U))
@@ -286,8 +286,8 @@ for theta in range(0, 360):
 
 angles, energy_values = zip(*energies)
 plt.plot(angles, energy_values)
-plt.xlabel("Угол (градусы)")
-plt.ylabel("Потенциальная энергия (эрг)")
-plt.title("График зависимости потенциальной энергии от угла")
+plt.xlabel(r"Угол $\theta$")
+plt.ylabel(r"Потенциальная энергия (Дж $\cdot 10^{-5}$)")
+plt.title(r"График зависимости потенциальной энергии от угла $\theta$")
 plt.grid(True)
 plt.show()
