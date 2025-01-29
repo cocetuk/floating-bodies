@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 """ ИЗОБРАЖЕНИЕ """
 # Загрузка изображения
-image_0 = cv2.imread('podkova.png', cv2.IMREAD_GRAYSCALE)
+image_0 = cv2.imread('star.png', cv2.IMREAD_GRAYSCALE)
 all_points0 = []
 all_points = []
 # Проверка, удалось ли загрузить изображение
@@ -68,9 +68,9 @@ distance = float(input())
 print('Введите массу фигуры в граммах:')
 m = float(input())
 print('Введите толщину фигуры в сантиметрах:')
-d = float(input())
+d = 4
 print('Введите плотность жидкости в г/см^3:')
-ro = float(input())
+ro = 1.26
 
 """ ФУНКЦИИ """
 
@@ -318,3 +318,122 @@ plt.ylabel(r"Потенциальная энергия (Дж $\cdot 10^{-5}$)")
 plt.title(r"График зависимости потенциальной энергии от угла $\theta$")
 plt.grid(True)
 plt.show()
+
+
+# Допустим, у вас уже есть список экстремумов:
+# extrema = [(theta1, U1, stability1), (theta2, U2, stability2), ... ]
+print('Введите угoл, который хотите посмотреть:')
+a = int(input())
+chosen_angle = a
+
+# Перевод угла в радианы
+rad = math.radians(chosen_angle)
+
+# Поворот исходного набора точек all_points
+#    (предполагается, что all_points уже существует и содержит координаты в виде [(x,y), ...])
+rotated_points = []
+for (x, y) in all_points:
+    x_new = x * math.cos(rad) - y * math.sin(rad)
+    y_new = x * math.sin(rad) + y * math.cos(rad)
+    rotated_points.append((x_new, y_new))
+
+# Находим bounding box для повёрнутого многоугольника, чтобы отрисовать его без выхода за границы
+xs = [p[0] for p in rotated_points]
+ys = [p[1] for p in rotated_points]
+
+min_x, max_x = int(min(xs)), int(max(xs))
+min_y, max_y = int(min(ys)), int(max(ys))
+
+width  = max_x - min_x + 100  # небольшой отступ по ширине
+height = max_y - min_y + 100  # небольшой отступ по высоте
+
+# Создаём пустое белое изображение нужного размера
+rotated_image = np.ones((height, width, 3), dtype=np.uint8) * 255
+
+# Сдвигаем точки так, чтобы вся фигура попала в "кадр"
+shifted_points = []
+dx, dy = -min_x + 50, -min_y + 50  # 50 пикселей отступа
+for (x, y) in rotated_points:
+    shifted_points.append((int(x + dx), int(y + dy)))
+
+# Рисуем многоугольник
+cv2.polylines(
+    rotated_image,
+    [np.array(shifted_points, dtype=np.int32)],
+    isClosed=True,
+    color=(0, 0, 0),
+    thickness=2
+)
+
+# Определяем площадь повёрнутого многоугольника
+rotated_area = calculate_area(rotated_points)
+
+# Рассчитываем уровень воды (h) в локальных координатах, исходя из площади погруженной части
+#    S = m / (ro * d) уже определена в вашем коде
+h_local = find_water_level(rotated_points, S)  # h_local – уровень воды в координатах "повёрнутого" контура
+
+# Определяем подводную часть
+submerged_poly_local = submerged_polygon(rotated_points, h_local)
+
+# Для отрисовки подводной части сдвигаем её точки аналогично основному контуру
+shifted_submerged_poly = []
+for (x, y) in submerged_poly_local:
+    shifted_submerged_poly.append((int(x + dx), int(y + dy)))
+
+# Рисуем подводную часть (можно другим цветом, например, синим)
+if len(shifted_submerged_poly) > 2:
+    cv2.polylines(
+        rotated_image,
+        [np.array(shifted_submerged_poly, dtype=np.int32)],
+        isClosed=True,
+        color=(255, 0, 0),
+        thickness=2
+    )
+
+# Вычисляем центры масс и плавучести
+Gx_local, Gy_local = calculate_centroid(rotated_points, rotated_area)
+Bx_local, By_local = calculate_centroid(submerged_poly_local, S)
+
+# Сдвигаем координаты центров так же, как и точки
+Gx_shifted, Gy_shifted = int(Gx_local + dx), int(Gy_local + dy)
+Bx_shifted, By_shifted = int(Bx_local + dx), int(By_local + dy)
+
+# Переворот изображения по вертикали
+rotated_image = cv2.flip(rotated_image, 0)
+
+# Получаем высоту изображения
+image_height, image_width = rotated_image.shape[:2]
+
+# Пересчитываем координаты для точек и текста
+Gx_new, Gy_new = Gx_shifted, image_height - Gy_shifted
+Bx_new, By_new = Bx_shifted, image_height - By_shifted
+
+# Рисуем точки
+cv2.circle(rotated_image, (Gx_new, Gy_new), 5, (0, 0, 0), -1)  # чёрный
+cv2.putText(
+    rotated_image,
+    "G",
+    (Gx_new + 10, Gy_new - 10),  # Сдвигаем текст относительно новой точки
+    cv2.FONT_HERSHEY_SIMPLEX,
+    0.5,
+    (0, 0, 0),  # чёрный
+    1
+)
+
+cv2.circle(rotated_image, (Bx_new, By_new), 5, (0, 0, 255), -1)  # красный
+cv2.putText(
+    rotated_image,
+    "B",
+    (Bx_new + 10, By_new - 10),  # Сдвигаем текст относительно новой точки
+    cv2.FONT_HERSHEY_SIMPLEX,
+    0.5,
+    (0, 0, 255),
+    1
+)
+
+# Сохранение изображения в файл
+cv2.imwrite(f"rotated_figure_{chosen_angle}_flipped_vertical.png", rotated_image)
+
+# Отображение изображения
+cv2.imshow(f"Flipped Figure at {chosen_angle} deg", rotated_image)
+cv2.waitKey(0)
