@@ -34,7 +34,6 @@ if not image_path:
     print("Изображение не выбрано, завершение программы.")
     exit()
 
-# Загрузка изображения
 image_0 = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
 # Если изображение не загружено, выводим ошибку
