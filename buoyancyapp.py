@@ -8,7 +8,6 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 
-# --- Вычислительные функции ---
 def calculate_area(polygon):
     n = len(polygon)
     area = 0
@@ -18,13 +17,11 @@ def calculate_area(polygon):
         area += x1 * y2 - x2 * y1
     return abs(area) / 2
 
-
 def find_units(polygon, distance_cm):
     xs = [p[0] for p in polygon]
     ys = [p[1] for p in polygon]
     px_length = max(max(xs) - min(xs), max(ys) - min(ys))
     return px_length / distance_cm
-
 
 def find_intersection(p1, p2, h):
     x1, y1 = p1; x2, y2 = p2
@@ -32,7 +29,6 @@ def find_intersection(p1, p2, h):
         x = x1 + (h - y1) * (x2 - x1) / (y2 - y1)
         return (x, h)
     return None
-
 
 def submerged_polygon(vertices, h):
     sub = []
@@ -45,7 +41,6 @@ def submerged_polygon(vertices, h):
             sub.append(inter)
     return sub
 
-
 def find_water_level(vertices, target_area, eps=1e-3):
     ymin = min(y for _, y in vertices)
     ymax = max(y for _, y in vertices)
@@ -56,7 +51,6 @@ def find_water_level(vertices, target_area, eps=1e-3):
         else:
             ymax = h
     return (ymin + ymax) / 2
-
 
 def calculate_centroid(polygon):
     A = calculate_area(polygon)
@@ -70,7 +64,6 @@ def calculate_centroid(polygon):
     factor = 1 / (6 * A) if A != 0 else 0
     return cx * factor, cy * factor
 
-
 def potential_energy(polygon, units, m, g, density, thickness):
     S_phys = m / (density * thickness)
     h = find_water_level(polygon, S_phys * units**2)
@@ -78,7 +71,6 @@ def potential_energy(polygon, units, m, g, density, thickness):
     Gx, Gy = calculate_centroid(polygon)
     Bx, By = calculate_centroid(submerged)
     return m * g * ((Gy - By) / units)
-
 
 def find_equilibrium_angle(polygon, units, m, density, thickness, g=9.82):
     energies = []
@@ -89,7 +81,6 @@ def find_equilibrium_angle(polygon, units, m, density, thickness, g=9.82):
         U = potential_energy(pts_rot, units, m, g, density, thickness)
         energies.append((theta, U))
     return min(energies, key=lambda x: x[1])[0]
-
 
 class BuoyancyApp(tk.Tk):
     def __init__(self):
