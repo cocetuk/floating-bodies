@@ -1,0 +1,115 @@
+import tkinter as tk
+from tkinter import filedialog, messagebox
+import cv2
+import numpy as np
+import math
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.pyplot as plt
+from matplotlib import animation
+from matplotlib.patches import Polygon
+
+# --- Функции вычислений (как в вашем коде) ---
+def find_units(polygon, distance):
+    max_x = max(p[0] for p in polygon)
+    min_x = min(p[0] for p in polygon)
+    max_y = max(p[1] for p in polygon)
+    min_y = min(p[1] for p in polygon)
+    length = max(max_x - min_x, max_y - min_y)
+    return length / distance
+
+# TODO: добавьте сюда calculate_area, find_water_level, submerged_polygon, calculate_centroid, potencial_energy
+
+# --- GUI Application ---
+class BuoyancyApp(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Buoyancy Simulator")
+        self.geometry("400x300")
+
+        # Параметры
+        self.image_path = None
+        self.distance = tk.DoubleVar(value=1.0)
+        self.mass = tk.DoubleVar(value=1.0)
+        self.thickness = tk.DoubleVar(value=1.0)
+        self.density = tk.DoubleVar(value=1.0)
+        self.image_label = tk.StringVar(value="Файл не выбран")
+
+        # Интерфейс
+        tk.Button(self, text="Выбрать изображение", command=self.choose_image).pack(pady=5)
+        tk.Label(self, textvariable=self.image_label).pack(pady=5)
+
+        self._make_entry("Максимальный размер (см):", self.distance)
+        self._make_entry("Масса (г):", self.mass)
+        self._make_entry("Толщина (см):", self.thickness)
+        self._make_entry("Плотность (г/см³):", self.density)
+
+        tk.Button(self, text="Запустить анимацию", command=self.run_animation).pack(pady=10)
+
+    def _make_entry(self, label_text, var):
+        frame = tk.Frame(self)
+        tk.Label(frame, text=label_text).pack(side=tk.LEFT)
+        tk.Entry(frame, textvariable=var).pack(side=tk.RIGHT)
+        frame.pack(pady=2)
+
+    def choose_image(self):
+        path = filedialog.askopenfilename(
+            filetypes=[("PNG", "*.png"), ("JPEG", "*.jpg;*.jpeg"), ("All files", "*")]
+        )
+        if path:
+            self.image_path = path
+            self.image_label.set(path)
+
+    def run_animation(self):
+        # Проверка
+        if not self.image_path:
+            messagebox.showerror("Ошибка", "Изображение не выбрано")
+            return
+        for var, name in [(self.distance, "Максимальный размер"),
+                          (self.mass, "Масса"),
+                          (self.thickness, "Толщина"),
+                          (self.density, "Плотность")]:
+            if var.get() <= 0:
+                messagebox.showerror("Ошибка", f"Введите положительное значение для {name}")
+                return
+
+        # Обработка изображения
+        img = cv2.imread(self.image_path, cv2.IMREAD_GRAYSCALE)
+        _, binary = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY_INV)
+        contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if not contours:
+            messagebox.showerror("Ошибка", "Контур не найден")
+            return
+        pts = contours[0].reshape(-1, 2)
+        h_img = img.shape[0]
+        points = [(x, h_img - y) for x, y in pts]
+
+        self.units = find_units(points, self.distance.get())
+        self.S = self.mass.get() / (self.density.get() * self.thickness.get())
+
+        self.animate_window(points)
+
+    def animate_window(self, pts):
+        anim_win = tk.Toplevel(self)
+        anim_win.title("Анимация погружения")
+        fig, ax = plt.subplots()
+        canvas = FigureCanvasTkAgg(fig, master=anim_win)
+        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
+        ax.set_aspect('equal')
+        lim = self.distance.get()
+        ax.set_xlim(-lim, lim)
+        ax.set_ylim(-lim, lim)
+
+        poly = Polygon([], closed=True, edgecolor='black', fill=False)
+        subm = Polygon([], closed=True, edgecolor='blue', alpha=0.3)
+        Gp, = ax.plot([], [], 'ko')
+        Bp, = ax.plot([], [], 'ro')
+        line, = ax.plot([], [], 'b--')
+
+        ax.add_patch(poly)
+        ax.add_patch(subm)
+
+        def init():
+            line.set_data([], [])
+            Gp.set_data([], [])
+            Bp.set_data([], [])
