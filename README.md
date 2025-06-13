@@ -1,3 +1,7 @@
+![image](https://github.com/user-attachments/assets/3da6cef2-4ff0-4813-9a21-471bb7f10bf9)
+![image](https://github.com/user-attachments/assets/ff433989-8a86-488e-bbf5-69b431dfc2ca)
+![image](https://github.com/user-attachments/assets/de0b5790-057d-4632-97e7-7759ea424652)
+
 Программа предназначена для анализа поведения 2d фигуры в жидкости с учетом ее ориентации и погружения.
 Программа принимает следующие входные данные:
 
