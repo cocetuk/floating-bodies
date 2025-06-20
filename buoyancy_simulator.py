@@ -8,14 +8,17 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 
-def calculate_area(polygon):
+def calculate_signed_area(polygon):
     n = len(polygon)
     area = 0
     for i in range(n):
         x1, y1 = polygon[i]
         x2, y2 = polygon[(i + 1) % n]
         area += x1 * y2 - x2 * y1
-    return abs(area) / 2
+    return area / 2
+
+def calculate_area(polygon):
+    return abs(calculate_signed_area(polygon))
 
 def find_units(polygon, distance_cm):
     xs = [p[0] for p in polygon]
@@ -55,7 +58,9 @@ def find_water_level(vertices, target_area, eps=1e-3):
     return (ymin + ymax) / 2
 
 def calculate_centroid(polygon):
-    A = calculate_area(polygon)
+    if not polygon:
+        return 0, 0
+    A = calculate_signed_area(polygon)
     cx = cy = 0
     for i in range(len(polygon)):
         x0, y0 = polygon[i]
@@ -188,6 +193,9 @@ class BuoyancyApp(tk.Tk):
             if math.hypot(x0 - xn, y0 - yn) > 10:
                 messagebox.showwarning("Ошибка", "Фигура не замкнута")
                 return
+            # Убираем последнюю точку если она дублирует первую
+            if len(points) > 3 and math.hypot(x0 - xn, y0 - yn) < 10:
+                points.pop()
             self.contour = points.copy()
             self.image_label.set("Нарисованная фигура")
             win.destroy()
@@ -211,10 +219,10 @@ class BuoyancyApp(tk.Tk):
         rad = math.radians(theta)
         R = np.array([[math.cos(rad), -math.sin(rad)], [math.sin(rad), math.cos(rad)]])
         ctr = [(cx0 + R.dot([dx, dy])[0], cy0 + R.dot([dx, dy])[1]) for dx, dy in pts_centered]
-        h = find_water_level(ctr, S_phys*units**2) / units
-        sub = submerged_polygon(ctr, h*units)
+        h = find_water_level(ctr, S_phys*units**2)
+        sub = submerged_polygon(ctr, h)
         Gx, Gy = calculate_centroid(ctr)
-        Bx, By = calculate_centroid(sub)
+        Bx, By = calculate_centroid(sub) if sub else (Gx, Gy)
 
         win = tk.Toplevel(self)
         win.title(f"Устойчивое равновесие: {theta}°")
@@ -223,7 +231,7 @@ class BuoyancyApp(tk.Tk):
         ax.set_facecolor('#1E1E1E')
         ax.add_patch(Polygon(ctr, closed=True, edgecolor='#00DDFF', fill=False))
         ax.add_patch(Polygon(sub, closed=True, edgecolor='#00DDFF', facecolor='#003344', alpha=0.5))
-        ax.axhline(y=h*units, color='#00DDFF', linestyle='--')
+        ax.axhline(y=h, color='#00DDFF', linestyle='--')
         ax.plot(Gx, Gy, 'wo'); ax.text(Gx+units*0.02, Gy, 'G', color='white')
         ax.plot(Bx, By, 'ro'); ax.text(Bx+units*0.02, By, 'B', color='red')
         ax.axis('equal'); ax.axis('off')
