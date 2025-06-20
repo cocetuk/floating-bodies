@@ -108,8 +108,8 @@ class BuoyancyApp(tk.Tk):
 
         self.contour = None
         self.distance = tk.DoubleVar(value=10.0)
-        self.mass = tk.DoubleVar(value=100.0)
-        self.thickness = tk.DoubleVar(value=1.0)
+        self.mass = tk.DoubleVar(value=25.0)
+        self.thickness = tk.DoubleVar(value=5.0)
         self.density = tk.DoubleVar(value=1.0)
         self.image_label = tk.StringVar(value="Файл не выбран или фигура не нарисована")
 
