@@ -209,7 +209,7 @@ def calculate_centroid(polygon, A):
     return Bx, By
 
 def potencial_energy(Gy, By):
-    U = m * 9.82 * 100 *  (Gy - By)
+    U = m * 9.82 * 100 * (Gy - By)
     return U
 
 

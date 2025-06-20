@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 """ ИЗОБРАЖЕНИЕ """
 # Загрузка изображения
-image_0 = cv2.imread('star.png', cv2.IMREAD_GRAYSCALE)
+image_0 = cv2.imread('tester.png', cv2.IMREAD_GRAYSCALE)
 all_points0 = []
 all_points = []
 # Проверка, удалось ли загрузить изображение
@@ -244,9 +244,9 @@ cv2.line(image_with_submerged,
          (255, 0, 0), 2)  # Синяя линия
 
 # Рисуем центр масс (G)
-cv2.circle(image_with_submerged, (Gx, Gy), 5, (0, 255, 255), -1)  # Жёлтый круг
+cv2.circle(image_with_submerged, (Gx, Gy), 5, (0, 0, 0), -1)  # Жёлтый круг
 cv2.putText(image_with_submerged, "G", (Gx + 10, Gy - 10),
-            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1)  # Метка "G"
+            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)  # Метка "G"
 
 # Рисуем центр плавучести (B) аналогично
 cv2.circle(image_with_submerged, (Bx, By), 5, (0, 0, 255), -1)  # Красный круг для B

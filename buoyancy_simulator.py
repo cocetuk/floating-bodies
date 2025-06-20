@@ -83,7 +83,7 @@ def find_equilibrium_angle(polygon, units, m, density, thickness, g=9.82):
     cx0, cy0 = calculate_centroid(polygon)
     base = [(p[0] - cx0, p[1] - cy0) for p in polygon]
     best = None
-    for theta in range(0, 360, 1):
+    for theta in np.arange(0, 360, 0.5):
         rad = math.radians(theta)
         R = np.array([[math.cos(rad), -math.sin(rad)], [math.sin(rad), math.cos(rad)]])
         rotated = [(cx0 + R.dot([dx, dy])[0], cy0 + R.dot([dx, dy])[1]) for dx, dy in base]
