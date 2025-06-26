@@ -1,14 +1,14 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
+from tkinter import filedialog, messagebox, ttk, simpledialog
 import tkinter.font as tkfont
 import cv2
 import numpy as np
 import math
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
-from tkinter import simpledialog
-from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
+
+
 
 def calculate_signed_area(polygon):
     n = len(polygon)
@@ -381,9 +381,24 @@ class BuoyancyApp(tk.Tk):
         extrema = self.find_extrema(angles, energies)
         for angle, energy, stability in extrema:
             color = 'green' if stability == "устойчивое" else 'red'
-            ax.plot(angle, energy, 'o', color=color)
-            ax.text(angle, energy, f"{angle}°\n{stability}", color=color,
-                    ha='center', va='bottom' if stability == "устойчивое" else 'top')
+            ax.plot(angle, energy, 'o', color=color, markersize=8, alpha=0.7)
+
+            text_props = {
+                'color': color,
+                'ha': 'center',
+                'va': 'bottom' if stability == "устойчивое" else 'top',
+                'fontsize': 9,
+                'bbox': dict(boxstyle="round,pad=0.3",
+                             fc="white",
+                             ec=color,
+                             lw=1,
+                             alpha=0.7)
+            }
+
+            offset = 0.05 * (max(energies) - min(energies))
+            text_y = energy + offset if stability == "устойчивое" else energy - offset
+
+            ax.text(angle, text_y, f"{angle:.1f}°", **text_props)
 
         canvas = FigureCanvasTkAgg(fig, master=win)
         canvas.draw()
