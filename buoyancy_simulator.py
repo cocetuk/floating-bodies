@@ -7,8 +7,8 @@ import math
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
-from tkinter import simpledialog  # Добавляем этот импорт
-from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk  # И этот тоже
+from tkinter import simpledialog
+from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
 
 def calculate_signed_area(polygon):
     n = len(polygon)
