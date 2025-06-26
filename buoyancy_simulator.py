@@ -7,6 +7,8 @@ import math
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
+from tkinter import simpledialog  # Добавляем этот импорт
+from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk  # И этот тоже
 
 def calculate_signed_area(polygon):
     n = len(polygon)
@@ -108,16 +110,18 @@ def orient(p, q, r):
 def seg_intersect(a1, a2, b1, b2):
     return orient(a1,a2,b1)*orient(a1,a2,b2) < 0 and orient(b1,b2,a1)*orient(b1,b2,a2) < 0
 
+
 class BuoyancyApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Buoyancy Simulator")
         self.configure(bg="#2E2E2E")
-        self.geometry("520x450")
+        self.geometry("520x500")  # Увеличил высоту для нового элемента
         self.resizable(False, False)
 
-        header = ttk.Label(self, text="Buoyancy Simulator", font=("Nunito",25), background="#2E2E2E", foreground="#ECECEC")
-        header.grid(row=0, column=0, columnspan=2, pady=(20,10))
+        header = ttk.Label(self, text="Buoyancy Simulator", font=("Nunito", 25), background="#2E2E2E",
+                           foreground="#ECECEC")
+        header.grid(row=0, column=0, columnspan=2, pady=(20, 10))
 
         default_font = tkfont.Font(family="Nunito", size=10)
         self.option_add("*Font", default_font)
@@ -131,27 +135,106 @@ class BuoyancyApp(tk.Tk):
 
         style = ttk.Style(self)
         style.theme_use('clam')
-        style.configure('TLabel', background='#2E2E2E', foreground='#ECECEC', font=('Nunito',11))
-        style.configure('TButton', background='#444444', foreground='#ECECEC', padding=8, font=('Nunito',11))
-        style.map('TButton', background=[('active','#555555')])
-        style.configure('TEntry', fieldbackground='#3C3C3C', foreground='#ECECEC', font=('Nunito',11))
+        style.configure('TLabel', background='#2E2E2E', foreground='#ECECEC', font=('Nunito', 11))
+        style.configure('TButton', background='#444444', foreground='#ECECEC', padding=8, font=('Nunito', 11))
+        style.map('TButton', background=[('active', '#555555')])
+        style.configure('TEntry', fieldbackground='#3C3C3C', foreground='#ECECEC', font=('Nunito', 11))
 
-        ttk.Button(self, text="Выбрать изображение", command=self.on_choose).grid(row=1,column=0,pady=10,padx=5)
-        ttk.Button(self, text="Нарисовать фигуру", command=self.draw_shape).grid(row=1,column=1,pady=10,padx=5)
-        ttk.Label(self, textvariable=self.image_label).grid(row=2,column=0,columnspan=2,pady=6)
+        ttk.Button(self, text="Выбрать изображение", command=self.on_choose).grid(row=1, column=0, pady=10, padx=5)
+        ttk.Button(self, text="Нарисовать фигуру", command=self.draw_shape).grid(row=1, column=1, pady=10, padx=5)
+        ttk.Label(self, textvariable=self.image_label).grid(row=2, column=0, columnspan=2, pady=6)
 
         self._entry_row(3, "Макс. размер (см)", self.distance)
         self._entry_row(4, "Масса (г)", self.mass)
         self._entry_row(5, "Толщина (см)", self.thickness)
         self._entry_row(6, "Плотность (г/см³)", self.density)
 
-        ttk.Button(self, text="Показать равновесие", command=self.show_equilibrium).grid(row=7,column=0,columnspan=2,pady=12)
+        ttk.Button(self, text="Показать равновесие", command=self.show_equilibrium).grid(row=7, column=0, columnspan=2,
+                                                                                         pady=12)
+
+        ttk.Button(self, text="Показать график энергии", command=self.show_energy_graph).grid(row=8, column=0,
+                                                                                              columnspan=2, pady=12)
 
         self.mode = tk.StringVar(value='polygon')
         modes_frame = ttk.Frame(self)
-        modes_frame.grid(row=8,column=0,columnspan=2)
-        ttk.Radiobutton(modes_frame, text='Полигон', variable=self.mode, value='polygon').pack(side=tk.LEFT,padx=10)
-        ttk.Radiobutton(modes_frame, text='Свободно', variable=self.mode, value='freehand').pack(side=tk.LEFT,padx=10)
+        modes_frame.grid(row=9, column=0, columnspan=2)
+        ttk.Radiobutton(modes_frame, text='Полигон', variable=self.mode, value='polygon').pack(side=tk.LEFT, padx=10)
+        ttk.Radiobutton(modes_frame, text='Свободно', variable=self.mode, value='freehand').pack(side=tk.LEFT, padx=10)
+
+        ttk.Button(self, text="Показать фигуру под углом", command=self.show_custom_angle).grid(row=9, column=0,
+                                                                                                columnspan=2, pady=12)
+
+        self.mode = tk.StringVar(value='polygon')
+        modes_frame = ttk.Frame(self)
+        modes_frame.grid(row=10, column=0, columnspan=2)  # Увеличиваем номер строки
+        ttk.Radiobutton(modes_frame, text='Полигон', variable=self.mode, value='polygon').pack(side=tk.LEFT, padx=10)
+        ttk.Radiobutton(modes_frame, text='Свободно', variable=self.mode, value='freehand').pack(side=tk.LEFT, padx=10)
+
+    def show_custom_angle(self):
+        """Показывает фигуру под выбранным углом"""
+        if not self.contour:
+            messagebox.showwarning("Внимание", "Сначала нарисуйте или выберите фигуру")
+            return
+
+        angle = simpledialog.askfloat("Выбор угла",
+                                      "Введите угол поворота (0-360 градусов):",
+                                      minvalue=0, maxvalue=360)
+        if angle is None:
+            return
+
+
+        units = find_units(self.contour, self.distance.get())
+        m = self.mass.get()
+        d = self.thickness.get()
+        ro = self.density.get()
+
+        cx, cy = calculate_centroid(self.contour)
+        pts = [(x - cx, y - cy) for x, y in self.contour]
+        R = lambda t: np.array([[math.cos(math.radians(t)), -math.sin(math.radians(t))],
+                                [math.sin(math.radians(t)), math.cos(math.radians(t))]])
+        rotated = [(cx + R(angle).dot([dx, dy])[0], cy + R(angle).dot([dx, dy])[1]) for dx, dy in pts]
+
+        S_phys = m / (ro * d)
+        h = find_water_level(rotated, S_phys * units ** 2)
+        submerged = submerged_polygon(rotated, h)
+
+        Gx, Gy = calculate_centroid(rotated)
+        Bx, By = calculate_centroid(submerged) if submerged else (Gx, Gy)
+
+        win = tk.Toplevel(self)
+        win.title(f"Фигура под углом {angle}°")
+
+        fig, ax = plt.subplots(facecolor='#1E1E1E')
+        plt.style.use('dark_background')
+        ax.set_facecolor('#1E1E1E')
+
+        ax.add_patch(Polygon(rotated, closed=True, edgecolor='#00DDFF', fill=False))
+
+        if submerged:
+            ax.add_patch(Polygon(submerged, closed=True, edgecolor='#00DDFF', facecolor='#003344', alpha=0.5))
+
+        ax.axhline(y=h, linestyle='--', color='#00DDFF')
+
+        ax.plot(Gx, Gy, 'wo')
+        ax.text(Gx + units * 0.02, Gy, 'G', color='white')
+
+        ax.plot(Bx, By, 'ro')
+        ax.text(Bx + units * 0.02, By, 'B', color='red')
+
+        ax.axis('equal')
+        ax.axis('off')
+
+        U = potential_energy(rotated, units, m, 9.82, ro, d)
+        ax.set_title(f"Угол: {angle}°; Потенциальная энергия: {U:.2f} (Дж·10⁻⁵)",
+                     color='white', pad=20)
+
+        canvas = FigureCanvasTkAgg(fig, master=win)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
+        toolbar = NavigationToolbar2Tk(canvas, win)
+        toolbar.update()
+        canvas._tkcanvas.pack(fill=tk.BOTH, expand=True)
 
     def _entry_row(self, row, label, var):
         ttk.Label(self, text=label).grid(row=row, column=0, sticky='W', padx=(10,5), pady=4)
@@ -239,5 +322,97 @@ class BuoyancyApp(tk.Tk):
         ax.axis('equal');ax.axis('off')
         canvas=FigureCanvasTkAgg(fig,master=win);canvas.get_tk_widget().pack(fill=tk.BOTH,expand=True);canvas.draw()
 
-if __name__=='__main__':
-    app=BuoyancyApp();app.mainloop()
+    def calculate_energy_values(self):
+        """Вычисляет значения потенциальной энергии для всех углов"""
+        if not self.contour:
+            messagebox.showwarning("Внимание", "Сначала нарисуйте или выберите фигуру")
+            return None, None
+
+        units = find_units(self.contour, self.distance.get())
+        m = self.mass.get()
+        d = self.thickness.get()
+        ro = self.density.get()
+
+        S_phys = m / (ro * d)
+        area = calculate_area(self.contour) / (units ** 2)
+        if area <= S_phys:
+            messagebox.showinfo("Результат", "Тело утонуло :(")
+            return None, None
+
+        cx0, cy0 = calculate_centroid(self.contour)
+        base = [(p[0] - cx0, p[1] - cy0) for p in self.contour]
+
+        angles = []
+        energies = []
+
+        for theta in range(0, 360, 1):
+            rad = math.radians(theta)
+            R = np.array([[math.cos(rad), -math.sin(rad)], [math.sin(rad), math.cos(rad)]])
+            rotated = [(cx0 + R.dot([dx, dy])[0], cy0 + R.dot([dx, dy])[1]) for dx, dy in base]
+
+            try:
+                U = potential_energy(rotated, units, m, 9.82, ro, d)
+                angles.append(theta)
+                energies.append(U * 1e5)
+            except:
+                continue
+
+        return angles, energies
+
+    def show_energy_graph(self):
+        """Показывает график потенциальной энергии"""
+        angles, energies = self.calculate_energy_values()
+        if angles is None or energies is None:
+            return
+
+        win = tk.Toplevel(self)
+        win.title("График потенциальной энергии")
+
+        fig, ax = plt.subplots(figsize=(8, 5), facecolor='#1E1E1E')
+        plt.style.use('dark_background')
+        ax.set_facecolor('#1E1E1E')
+
+        ax.plot(angles, energies, 'w-', linewidth=2)
+        ax.set_xlabel(r"Угол $\theta$ (°)", color='white')
+        ax.set_ylabel(r"Потенциальная энергия (Дж $\cdot 10^{-5}$)", color='white')
+        ax.set_title(r"График зависимости потенциальной энергии от угла $\theta$", color='white')
+        ax.grid(True, color='#444444')
+
+        extrema = self.find_extrema(angles, energies)
+        for angle, energy, stability in extrema:
+            color = 'green' if stability == "устойчивое" else 'red'
+            ax.plot(angle, energy, 'o', color=color)
+            ax.text(angle, energy, f"{angle}°\n{stability}", color=color,
+                    ha='center', va='bottom' if stability == "устойчивое" else 'top')
+
+        canvas = FigureCanvasTkAgg(fig, master=win)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
+        toolbar = NavigationToolbar2Tk(canvas, win)
+        toolbar.update()
+        canvas._tkcanvas.pack(fill=tk.BOTH, expand=True)
+
+    def find_extrema(self, angles, energies):
+        """Находит экстремумы на графике энергии"""
+        extrema = []
+        n = len(angles)
+
+        for i in range(1, n - 1):
+            prev = energies[i - 1]
+            curr = energies[i]
+            next = energies[i + 1]
+
+            if curr > prev and curr > next:
+                extrema.append((angles[i], energies[i], "неустойчивое"))
+            elif curr < prev and curr < next:
+                extrema.append((angles[i], energies[i], "устойчивое"))
+
+        return extrema
+
+
+
+if __name__ == '__main__':
+    app = BuoyancyApp()
+    app.mainloop()
+
