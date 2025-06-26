@@ -1,6 +1,6 @@
 # Buoyancy Simulator
 
-<img src="(https://github.com/user-attachments/assets/d0c755d7-cd99-4c97-838f-bd2ccf3b0e2d)" width="300" />
+<img src="[https://github.com/user-attachments/assets/d0c755d7-cd99-4c97-838f-bd2ccf3b0e2d]" width="500" />
 
 ![Status: In Development](https://img.shields.io/badge/status-в%20разработке-green) ![Python Version](https://img.shields.io/badge/python-3.7%2B-blue)
 
