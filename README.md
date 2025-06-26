@@ -1,6 +1,6 @@
 # Buoyancy Simulator
 
-![Status: In Development](https://img.shields.io/badge/status-в%20разработке-grey) ![Python Version](https://img.shields.io/badge/python-3.7%2B-blue)
+![Status: In Development](https://img.shields.io/badge/status-в%20разработке-green) ![Python Version](https://img.shields.io/badge/python-3.7%2B-blue)
 
 Наглядный симулятор плавучести плоских фигур в жидкости с расчётом положения равновесия и потенциальной энергии при любом угле поворота. Решает задачу обучения и визуализации основ гидростатики: от загрузки контура до построения графиков энергии.
 
