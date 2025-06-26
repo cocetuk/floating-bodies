@@ -2,7 +2,7 @@
 
 ![Status: In Development](https://img.shields.io/badge/status-в%20разработке-green) ![Python Version](https://img.shields.io/badge/python-3.7%2B-blue)
 
-Данный проект, название которого "Исследование поведения плавающих тел в жидкости", был выполнен в рамках проектной деятельности по программированию. Результатом проекта является наглядный симулятор плавучести ([buoyancy_simulator.py]([https://docs.python.org/3/library/tkinter.html](https://github.com/cocetuk/floating-bodies/blob/main/buoyancy_simulator.py))) плоских фигур в жидкости с расчётом положения равновесия и потенциальной энергии при любом угле поворота.
+Данный проект, название которого "Исследование поведения плавающих тел в жидкости", был выполнен в рамках исследовательской деятельности по физике, а дорабатывался -- в качестве проекта по прогрграммированию. Результатом проекта является наглядный симулятор плавучести ([buoyancy_simulator.py]([https://docs.python.org/3/library/tkinter.html](https://github.com/cocetuk/floating-bodies/blob/main/buoyancy_simulator.py))) плоских фигур в жидкости с расчётом положения равновесия и потенциальной энергии при любом угле поворота.
 
 ## Содержание
 
