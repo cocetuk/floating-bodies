@@ -94,14 +94,7 @@ def find_equilibrium_angle(polygon, units, m, density, thickness, g=9.82):
             best = (theta, U)
     theta_coarse = best[0]
     best_fine = (theta_coarse, best[1])
-    for d in range(-5, 6):
-        theta = (theta_coarse + d) % 360
-        rad = math.radians(theta)
-        R = np.array([[math.cos(rad), -math.sin(rad)], [math.sin(rad), math.cos(rad)]])
-        rotated = [(cx0 + R.dot([dx, dy])[0], cy0 + R.dot([dx, dy])[1]) for dx, dy in base]
-        U = potential_energy(rotated, units, m, g, density, thickness)
-        if U < best_fine[1]:
-            best_fine = (theta, U)
+
     return best_fine[0]
 
 def orient(p, q, r):
@@ -166,7 +159,7 @@ class BuoyancyApp(tk.Tk):
 
         self.mode = tk.StringVar(value='polygon')
         modes_frame = ttk.Frame(self)
-        modes_frame.grid(row=10, column=0, columnspan=2)  # Увеличиваем номер строки
+        modes_frame.grid(row=10, column=0, columnspan=2)
         ttk.Radiobutton(modes_frame, text='Полигон', variable=self.mode, value='polygon').pack(side=tk.LEFT, padx=10)
         ttk.Radiobutton(modes_frame, text='Свободно', variable=self.mode, value='freehand').pack(side=tk.LEFT, padx=10)
 
