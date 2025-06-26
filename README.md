@@ -1,7 +1,5 @@
 # Buoyancy Simulator
 
-<img src="[https://github.com/user-attachments/assets/95b51e76-0073-47a1-b43e-1b22c10c6bec]" width="500" />
-
 ![Status: In Development](https://img.shields.io/badge/status-в%20разработке-green) ![Python Version](https://img.shields.io/badge/python-3.7%2B-blue)
 
 Данный проект, название которого "Исследование поведения плавающих тел в жидкости", был выполнен в рамках проектной деятельности по программированию. Результатом проекта является наглядный симулятор плавучести ([buoyancy_simulator.py]([https://docs.python.org/3/library/tkinter.html](https://github.com/cocetuk/floating-bodies/blob/main/buoyancy_simulator.py))) плоских фигур в жидкости с расчётом положения равновесия и потенциальной энергии при любом угле поворота.
