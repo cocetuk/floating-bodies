@@ -1,2 +1,32 @@
-# Auto detect text files and perform LF normalization
+*.py text eol=lf
+*.pyw text eol=lf
+*.txt text eol=lf
+*.md text eol=lf
+*.rst text eol=lf
+
+*.csv text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text
+
+*.ini text eol=lf
+*.cfg text eol=lf
+
+*.ipynb binary
+
+Pipfile.lock merge=union
+poetry.lock merge=union
+
+*.exe binary
+*.dll binary
+
+*.geojson text eol=lf
+
 * text=auto
