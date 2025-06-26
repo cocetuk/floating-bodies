@@ -8,12 +8,9 @@
 
 - [Технологии](#технологии)  
 - [Начало работы](#начало-работы)  
-- [Разработка](#разработка)  
-- [Тестирование](#тестирование)  
-- [Deploy и CI/CD](#deploy-и-cicd)  
+- [Разработка](#разработка) 
 - [To do](#to-do)  
 - [Команда проекта](#команда-проекта)  
-- [Источники](#источники)  
 
 ## Технологии
 
@@ -21,8 +18,7 @@
 - [Tkinter](https://docs.python.org/3/library/tkinter.html) — графический интерфейс  
 - [OpenCV](https://opencv.org/) — импорт и обработка изображений  
 - [NumPy](https://numpy.org/) — численные расчёты и матрицы  
-- [Matplotlib](https://matplotlib.org/) — отрисовка фигур и графиков  
-- [pytest](https://docs.pytest.org/) — модульное тестирование  
+- [Matplotlib](https://matplotlib.org/) — отрисовка фигур и графиков    
 
 ## Начало работы
 
@@ -43,7 +39,7 @@
    ```
 4. Запустите приложение:  
    ```sh
-   python main.py
+   python buoyancy_simulator.py
    ```
 
 ## Разработка
@@ -63,28 +59,8 @@ pip install -r requirements.txt
 ### Запуск в режиме разработки
 
 ```sh
-python main.py
+python buoyancy_simulator.py
 ```
-
-### Сборка дистрибутива (опционально)
-
-Для упаковки в исполняемый файл можно использовать [PyInstaller](https://www.pyinstaller.org/):
-```sh
-pip install pyinstaller
-pyinstaller --onefile main.py
-```
-
-## Тестирование
-
-Для запуска юнит-тестов (pytest):
-```sh
-pytest --maxfail=1 --disable-warnings -q
-```
-
-## Deploy и CI/CD
-
-- Настроен GitHub Actions для автоматической прогонки тестов и отчёта покрытия кода  
-- По пушу в `main` прогоняются CI-пайплайны из `.github/workflows/ci.yml`  
 
 
 ## To do
@@ -102,10 +78,3 @@ pytest --maxfail=1 --disable-warnings -q
 - Егор Ягодин
 - Никита Дедов
 - Тимофей Попов
-
-## Источники
-
-- Основная идея расчёта плавучести: Архимед, классические учебники по гидростатике  
-- Обработка изображений — документация OpenCV  
-- Визуализация — примеры Matplotlib из официального руководства  
-- Тестирование — шаблоны pytest на GitHub  
